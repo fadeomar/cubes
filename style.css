@@ -10,6 +10,7 @@ body {
   height: 100%;
   place-items: center;
   background-color: #000;
+  color: white;
 }
 
 .container {
@@ -19,4 +20,12 @@ body {
   justify-content: center;
   flex-direction: column;
   gap: 40px;
+}
+
+.section {
+  margin: 32px;
+}
+
+.section_title {
+  margin-bottom: 16px;
 }
