@@ -1,0 +1,118 @@
+body {
+  margin: 4% auto;
+  font-family: "Source Sans Pro", sans-serif;
+  letter-spacing: 5px;
+  font-size: 1.8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.calculator {
+  max-width: 350px;
+  padding: 20px;
+  box-shadow: 14px 16px 40px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  border: 1px solid #b1b0b0;
+  background: rgb(255, 255, 225);
+}
+
+.input {
+  height: 60px;
+  text-align: right;
+  padding: 8px;
+  font-size: 2.5rem;
+  overflow-x: auto;
+  background: white;
+  border: 1px solid #bbb;
+  box-shadow: inset 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+.operators {
+  display: flex;
+  gap: 8px;
+}
+
+.operators div {
+  border: 1px solid #bbb;
+  border-radius: 1px;
+  flex: 1;
+  text-align: center;
+  padding: 10px 6px;
+  margin: 20px 4px 10px 0;
+  cursor: pointer;
+  background-color: #ddd;
+}
+
+.operators div:hover {
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  border-color: #aaa;
+}
+
+.operators div:active {
+  font-weight: bold;
+}
+
+.numbers {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.numbers div {
+  border: 1px solid #ddd;
+  border-radius: 1px;
+  width: 80px;
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  margin: 10px 4px 10px 0;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: all 0.2s ease-in-out;
+}
+
+.numbers div:hover {
+  background-color: #f1f1f1;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  border-color: #bbb;
+}
+
+.numbers div:active {
+  font-weight: bold;
+}
+
+#clear {
+  background: rgb(245, 207, 142);
+}
+
+.equal {
+  background-color: #7292c5;
+  flex: 1;
+  text-align: center;
+  padding: 34px 10px;
+  margin: 10px 0;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.2s ease-in-out;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+}
+
+.equal:hover {
+  background: #307cf9;
+}
+
+.equal:active {
+  box-shadow: 0px 5px 10px 0px #7292c5;
+}
