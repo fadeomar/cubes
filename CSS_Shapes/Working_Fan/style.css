@@ -1,0 +1,65 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #b5eba2;
+}
+
+.fan {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: #ddd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: spin 1s infinite linear;
+}
+
+.fan::after {
+  position: absolute;
+  content: "";
+  width: 100px;
+  height: 100px;
+  background: #98d198;
+  border-radius: 50%;
+  border: 15px solid rgb(52, 52, 52);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+.blade {
+  position: absolute;
+  width: 200px;
+  height: 100px;
+  background: #e5ff00;
+  border-radius: 0 50px 50px 0;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+.blade:nth-child(1) {
+  transform: translate(150px);
+}
+
+.blade:nth-child(2) {
+  transform: rotate(120deg) translate(150px);
+}
+
+.blade:nth-child(3) {
+  transform: rotate(240deg) translate(150px);
+}
+
+.fan_key {
+  position: absolute;
+  bottom: 50px;
+  width: 40px;
+  height: 40px;
+}
