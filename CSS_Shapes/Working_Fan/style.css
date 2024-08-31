@@ -63,3 +63,21 @@ body {
   width: 40px;
   height: 40px;
 }
+
+.fan_key + .fan {
+  animation-play-state: running;
+}
+
+.fan_key:checked + .fan {
+  animation-play-state: paused;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
