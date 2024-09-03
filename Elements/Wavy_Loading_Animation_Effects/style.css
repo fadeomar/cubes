@@ -1,0 +1,50 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #1c2630;
+}
+
+.loader {
+  position: relative;
+  cursor: default;
+  -webkit-box-reflect: below -25px linear-gradient(transparent, #0005);
+}
+
+.loader span {
+  position: relative;
+  display: inline-flex;
+  font-size: 3em;
+  color: #fff;
+  font-weight: 800;
+  animation: loading 2s ease-in-out infinite;
+  animation-delay: calc(0.15s * var(--i));
+  -webkit-text-stroke: 1px #fff9;
+}
+
+@keyframes loading {
+  0% {
+    transform: translateY(0px);
+    color: transparent;
+  }
+
+  20% {
+    transform: translateY(-60px);
+    color: #fff;
+    text-shadow: 0 0 5px #fff, 0 0 25px #fff, 0 0 50px #fff;
+  }
+
+  40%,
+  100% {
+    transform: translateY(0px);
+    color: transparent;
+  }
+}
