@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Digital clock | Cubes</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="time">
+      <!-- seconds circle -->
+      <div class="circle" style="--color: #e91e63">
+        <div class="dots sec_dot"></div>
+        <svg>
+          <circle cx="120" cy="120" r="120" id="circle-seconds"></circle>
+        </svg>
+      </div>
+
+      <!-- minutes circle -->
+      <div class="circle" style="--color: #4caf50">
+        <div class="dots min_dot"></div>
+        <svg>
+          <circle cx="100" cy="100" r="100" id="circle-minutes"></circle>
+        </svg>
+      </div>
+
+      <!-- hours circle -->
+      <div class="circle" style="--color: #ffeb3b">
+        <div class="dots hr_dot"></div>
+        <svg>
+          <circle cx="80" cy="80" r="80" id="circle-hours"></circle>
+        </svg>
+      </div>
+
+      <div class="time-box">
+        <div class="hours" style="--color: #e91e63">00</div>
+        <div class="minutes" style="--color: #4caf50">00</div>
+        <div class="seconds" style="--color: #ffeb3b">00</div>
+        <div class="zone">
+          <div id="time-zone">AM</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
