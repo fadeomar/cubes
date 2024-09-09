@@ -1,0 +1,60 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #140032;
+  position: relative;
+}
+
+.leaf {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 400px;
+  height: 400px;
+  animation: rotateAnimation 13s linear infinite reverse;
+}
+
+.clover {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.sprout {
+  width: 150px;
+  height: 15px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.sprout i {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  animation: rotateAnimation 5s linear infinite reverse;
+}
+
+@keyframes rotateAnimation {
+  100% {
+    transform: rotate(360deg);
+  }
+}
