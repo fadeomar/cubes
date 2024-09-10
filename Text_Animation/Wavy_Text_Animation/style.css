@@ -1,0 +1,43 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #140032;
+  position: relative;
+}
+
+.container {
+  position: relative;
+}
+
+/* generated span from JS file */
+.container span {
+  position: relative;
+  color: #fff;
+  font-size: 2em;
+  display: inline-block;
+  animation: wavy 2s ease-in-out infinite;
+  animation-delay: calc(0.1s * var(--i));
+  font-family: cursive;
+  width: 24px;
+}
+
+@keyframes wavy {
+  0%,
+  40%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-50px);
+  }
+}
