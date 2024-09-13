@@ -1,0 +1,70 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #140032;
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px;
+  background: rgba(233, 224, 224, 0.301);
+}
+
+.container div {
+  width: 5vw;
+  height: 5vw;
+  animation: changeColor 2s ease infinite, animateBg 2s ease infinite;
+}
+
+@keyframes changeColor {
+  0% {
+    background: lightpink;
+  }
+
+  20% {
+    background: yellow;
+  }
+
+  40% {
+    background: red;
+  }
+
+  50% {
+    background: orange;
+  }
+
+  60% {
+    background: greenyellow;
+  }
+
+  80% {
+    background: blue;
+  }
+
+  100% {
+    background: white;
+  }
+}
+
+@keyframes animateBg {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
