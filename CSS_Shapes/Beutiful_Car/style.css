@@ -1,0 +1,14 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #140032;
+}
+
+h1 {
+  position: absolute;
+  top: 140px;
+  color: white;
+  font-family: cursive;
+}
