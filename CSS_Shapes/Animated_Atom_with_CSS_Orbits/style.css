@@ -1,0 +1,140 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-size: 30px;
+  width: 100dvw;
+  height: 100dvh;
+  padding: 2em;
+  background: linear-gradient(30deg, lightpink, pink, white);
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.atom {
+  height: 10em;
+  width: 10em;
+  position: relative;
+  animation: spin 15s linear infinite alternate-reverse;
+}
+
+.nucleus {
+  height: 5em;
+  width: 5em;
+  position: absolute;
+  top: 3em;
+  left: 3em;
+}
+
+.half_atom {
+  display: flex;
+}
+
+.half_atom_2 {
+  display: flex;
+  margin-top: -0.6em;
+}
+
+.down {
+  margin-left: -0.6em;
+}
+
+.particle {
+  border-radius: 50%;
+  height: 2em;
+  width: 2em;
+  box-shadow: 0 0 0.5em 0.1em whitesmoke;
+}
+
+.neutron {
+  background-color: blue;
+  box-shadow: 0 0 0.2em 0.1em powderblue;
+}
+
+.proton {
+  background-color: red;
+  box-shadow: 0 0 0.2em 0.1em pink;
+}
+
+.orbit {
+  height: 12em;
+  width: 10em;
+  border-radius: 50%;
+  border-left: 0.1em solid rgba(250, 250, 250, 0.3);
+  border-right: 0.1em solid rgba(250, 250, 250, 0.3);
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: revolve 5s linear infinite;
+}
+
+.orbit::after {
+  content: "";
+  display: block;
+  height: 1.2em;
+  width: 1.2em;
+  background-color: yellow;
+  box-shadow: 0 0 1em 0.5em powderblue;
+  border: 0.1em solid whitesmoke;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.left.orbit::after {
+  top: 1em;
+  left: 1em;
+  animation: grow-shrink 5s linear infinite;
+}
+
+.right.orbit {
+  height: 10em;
+  width: 12em;
+}
+
+.right.orbit::after {
+  bottom: 1em;
+  right: 1em;
+  animation: grow-shrink 5s linear infinite reverse;
+}
+
+/* animations */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes revolve {
+  50% {
+    transform: rotate(180deg) scale(0.75);
+  }
+
+  to {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes grow-shrink {
+  50% {
+    transform: scale(0.75);
+    box-shadow: 0 0 0.5em 0.1em whitesmoke;
+  }
+
+  to {
+    transform: scale(1);
+    box-shadow: 0 0 1em 0.5em powderblue;
+  }
+}
+
+h1 {
+  position: absolute;
+  font-family: cursive;
+  font-size: 32px;
+  top: 120px;
+}
