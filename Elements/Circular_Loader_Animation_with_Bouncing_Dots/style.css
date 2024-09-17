@@ -1,0 +1,41 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #252839;
+}
+
+.loader div {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 8px;
+  animation: animate 1.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.1s);
+}
+
+@keyframes animate {
+  0%,
+  100% {
+    transform: scale(0.2);
+    background-color: #bd0036;
+  }
+
+  40% {
+    transform: scale(1);
+    background-color: #f25330;
+  }
+
+  50% {
+    transform: scale(1);
+    background-color: #f2b900;
+  }
+}
