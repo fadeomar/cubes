@@ -1,0 +1,39 @@
+body {
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #111;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #515050;
+  animation: jump 0.8s ease-in-out infinite alternate;
+  background-color: powderblue;
+  animation-delay: calc(var(--i) * 0.1s);
+}
+
+@keyframes jump {
+  100% {
+    transform: translateY(-5rem) scale(1.9);
+    background-color: pink;
+  }
+}
+
+h1 {
+  position: absolute;
+  top: 140px;
+  color: white;
+  font-family: cursive;
+  text-align: center;
+  width: 100%;
+}
