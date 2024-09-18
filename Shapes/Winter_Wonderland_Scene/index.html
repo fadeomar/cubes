@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Winter Wonderland Scene</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <svg width="500" height="500" viewBox="-100 -100 200 200">
+      <defs>
+        <g id="tree">
+          <polygon points="-10, 0 10, 0 0 -50" fill="#38755b" />
+          <line x2="0" y2="10" stroke="#778074" stroke-width="2"></line>
+        </g>
+        <circle id="big" cx="0" cy="0" r="5" fill="white"></circle>
+        <circle id="small" cx="0" cy="0" r="3" fill="white"></circle>
+      </defs>
+
+      <rect x="-100" y="-100" width="200" height="200" fill="#F1DBC3"></rect>
+      <circle cx="0" cy="380" r="350" fill="#F8F4E8"></circle>
+
+      <use href="#tree" x="-30" y="25" transform="scale(2)"></use>
+      <use href="#tree" x="-20" y="40" transform="scale(1.2)"></use>
+      <use href="#tree" x="40" y="40" transform="scale(1)"></use>
+      <use href="#tree" x="50" y="30" transform="scale(1.5)"></use>
+
+      <use href="#big" x="0" y="0"></use>
+      <use href="#big" x="-50" y="-20"></use>
+      <use href="#big" x="30" y="-40"></use>
+      <use href="#big" x="50" y="-20"></use>
+      <use href="#big" x="30" y="50"></use>
+      <use href="#big" x="-70" y="-80"></use>
+      <use href="#big" x="30" y="50"></use>
+      <use href="#big" x="90" y="-80"></use>
+      <use href="#small" x="10" y="-50"></use>
+      <use href="#small" x="-50" y="-60"></use>
+      <use href="#small" x="30" y="70"></use>
+      <use href="#small" x="10" y="-80"></use>
+    </svg>
+    <h1>Winter Wonderland Scene | HTML only</h1>
+  </body>
+</html>

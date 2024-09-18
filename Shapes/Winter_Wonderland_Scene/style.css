@@ -1,0 +1,16 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+h1 {
+  position: absolute;
+  top: 50px;
+  color: white;
+  font-family: cursive;
+  text-align: center;
+  color: gray;
+  width: 100%;
+}
