@@ -1,0 +1,57 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: steelblue;
+}
+
+.empty {
+  height: 150px;
+  width: 150px;
+  margin: 10px;
+  border: 3px solid black;
+  background: white;
+}
+
+.fill {
+  height: 145px;
+  width: 145px;
+  cursor: pointer;
+  background-color: pink;
+}
+
+.hold {
+  border: 5px solid #ccc;
+}
+
+.hovered {
+  background-color: #333;
+  border-color: white;
+  border-style: dashed;
+}
+
+@media (max-width: 800px) {
+  body {
+    flex-direction: column;
+  }
+  h1 {
+    display: none;
+  }
+}
+
+h1 {
+  position: absolute;
+  top: 140px;
+  color: white;
+  font-family: cursive;
+  text-align: center;
+  width: 100%;
+}
