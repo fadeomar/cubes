@@ -1,0 +1,23 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+canvas {
+  width: 95vmin;
+  height: 95vmin;
+}
+/* The vmin unit in CSS is a relative length unit based on the viewport's minimum dimension. */
+
+h1 {
+  position: absolute;
+  top: 140px;
+  color: white;
+  font-family: cursive;
+  text-align: center;
+  color: gray;
+  width: 100%;
+}
