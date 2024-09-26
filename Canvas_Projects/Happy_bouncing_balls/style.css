@@ -1,0 +1,15 @@
+body {
+  height: 100vh;
+  background: steelblue;
+}
+
+h1 {
+  position: absolute;
+  top: 80px;
+  color: white;
+  font-family: cursive;
+  text-align: center;
+  width: 80%;
+  left: 50%;
+  transform: translateX(-50%);
+}
