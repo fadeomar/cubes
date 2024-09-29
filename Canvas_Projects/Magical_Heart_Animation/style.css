@@ -1,0 +1,17 @@
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  position: absolute;
+  top: 50px;
+  font-family: cursive;
+  text-align: center;
+  color: rgb(0, 0, 0);
+  width: 100%;
+  z-index: 77;
+}
