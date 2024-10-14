@@ -1,0 +1,94 @@
+body {
+  --grid-size: 25vmin; /* Size of the background grid */
+  --half-grid: calc(var(--grid-size) / 2); /* half size for positioning*/
+  --primary-color: pink;
+  --secondary-color: dodgerblue;
+  --background-color: white;
+  --animation-duration: 4000ms;
+  --animation-timing: cubic-bezier(0.76, 0, 0.24, 1);
+
+  background-color: var(--background-color);
+  background-image: linear-gradient(
+      45deg,
+      var(--primary-color) 25%,
+      transparent 25%
+    ),
+    linear-gradient(-45deg, var(--primary-color) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--secondary-color) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--secondary-color) 75%);
+  background-size: var(--grid-size) var(--grid-size);
+  background-position: calc(var(--half-grid) * 1) calc(var(--half-grid) * 0),
+    calc(var(--half-grid) * -1) calc(var(--half-grid) * 1),
+    calc(var(--half-grid) * 1) calc(var(--half-grid) * -1),
+    calc(var(--half-grid) * -1) calc(var(--half-grid) * 0);
+  animation: bgChange var(--animation-duration) var(--animation-timing) infinite,
+    bgPositionChange var(--animation-duration) var(--animation-timing) infinite;
+  overflow: hidden;
+}
+
+@keyframes bgChange {
+  0%,
+  25% {
+    --background-color: var(--background-color);
+  }
+  26%,
+  50% {
+    --background-color: var(--primary-color);
+  }
+
+  51%,
+  75% {
+    --background-color: var(--background-color);
+  }
+
+  76%,
+  100% {
+    --background-color: var(--secondary-color);
+  }
+}
+
+@keyframes bgPositionChange {
+  0% {
+    background-position: calc(var(--half-grid) * 1) calc(var(--half-grid) * 0),
+      calc(var(--half-grid) * -1) calc(var(--half-grid) * 1),
+      calc(var(--half-grid) * 1) calc(var(--half-grid) * -1),
+      calc(var(--half-grid) * -1) calc(var(--half-grid) * 0);
+  }
+
+  25% {
+    background-position: calc(var(--half-grid) * 1) calc(var(--half-grid) * 4),
+      calc(var(--half-grid) * -1) calc(var(--half-grid) * 5),
+      calc(var(--half-grid) * 1) calc(var(--half-grid) * 3),
+      calc(var(--half-grid) * -1) calc(var(--half-grid) * 4);
+  }
+
+  50% {
+    background-position: calc(var(--half-grid) * 3) calc(var(--half-grid) * 8),
+      calc(var(--half-grid) * -3) calc(var(--half-grid) * 9),
+      calc(var(--half-grid) * 2) calc(var(--half-grid) * 7),
+      calc(var(--half-grid) * -2) calc(var(--half-grid) * 8);
+  }
+
+  75% {
+    background-position: calc(var(--half-grid) * 3) calc(var(--half-grid) * 12),
+      calc(var(--half-grid) * -3) calc(var(--half-grid) * 13),
+      calc(var(--half-grid) * 2) calc(var(--half-grid) * 11),
+      calc(var(--half-grid) * -2) calc(var(--half-grid) * 12);
+  }
+
+  100% {
+    background-position: calc(var(--half-grid) * 6) calc(var(--half-grid) * 16),
+      calc(var(--half-grid) * -5) calc(var(--half-grid) * 17),
+      calc(var(--half-grid) * 5) calc(var(--half-grid) * 15),
+      calc(var(--half-grid) * -5) calc(var(--half-grid) * 16);
+  }
+}
+
+h1 {
+  position: absolute;
+  font-family: cursive;
+  font-size: 40px;
+  top: 120px;
+  text-align: center;
+  width: 100%;
+}
