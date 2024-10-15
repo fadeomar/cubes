@@ -1,0 +1,15 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  height: 100vh;
+}
+
+h1 {
+  position: absolute;
+  color: white;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 70px;
+  font-family: cursive;
+  text-align: center;
+}
