@@ -1,0 +1,16 @@
+body {
+  overflow: hidden;
+  height: 100vh;
+  background: black;
+}
+
+h1 {
+  position: absolute;
+  font-family: cursive;
+  font-size: 40px;
+  top: 120px;
+  text-align: center;
+  width: 100%;
+  z-index: 99;
+  color: white;
+}
