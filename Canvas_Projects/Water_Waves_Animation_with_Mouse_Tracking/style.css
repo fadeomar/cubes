@@ -1,0 +1,13 @@
+body {
+  overflow: hidden;
+  height: 100vh;
+}
+
+h1 {
+  position: absolute;
+  font-family: cursive;
+  text-align: center;
+  top: 10;
+  left: 50%;
+  transform: translateX(-50%);
+}
