@@ -1,5 +1,7 @@
 # Codewars: Your Order, Please Kata Explanation
 
+Kata link : [Your Order, Please Kata](https://www.codewars.com/kata/55c45be3b2079eccff00010f/javascript)
+
 ## Problem Description:
 
 In this Kata, your task is to sort the words in a given string based on the number each word contains. The numbers range from 1 to 9, and the position of each word in the output string corresponds to the number found within it.
