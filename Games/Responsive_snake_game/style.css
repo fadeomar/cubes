@@ -1,0 +1,104 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: black;
+  min-height: 100vh;
+  font-family: cursive;
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#board {
+  background: linear-gradient(rgb(172, 236, 172), rgb(47, 103, 224));
+  width: 90vmin;
+  height: 90vmin;
+  border: 12px solid pink;
+  display: grid;
+  grid-template-rows: repeat(18, 1fr);
+  grid-template-columns: repeat(18, 1fr);
+  border-radius: 16px;
+}
+
+.buttons {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+  .container {
+    flex-direction: column;
+  }
+  .buttons {
+    display: block;
+    text-transform: uppercase;
+    position: relative;
+    padding-top: 84px;
+    margin-top: 48px;
+  }
+
+  .button {
+    background: linear-gradient(rgb(219, 7, 7), rgb(114, 240, 233));
+    border: 5px solid dodgerblue;
+    width: 60px;
+    height: 60px;
+    position: absolute;
+  }
+  .btn-1 {
+    top: 10px;
+  }
+  .btn-2 {
+    left: -80px;
+  }
+
+  .btn-3 {
+    bottom: -120px;
+  }
+  .btn-4 {
+    right: -140px;
+  }
+}
+
+#scoreBox {
+  color: white;
+  font-weight: bold;
+  font-size: 32px;
+  position: absolute;
+  top: 2%;
+  left: 10%;
+}
+
+#hiscoreBox {
+  color: white;
+  font-weight: bold;
+  font-size: 32px;
+  position: absolute;
+  top: 6%;
+  left: 10%;
+}
+
+.head {
+  background: linear-gradient(rgb(219, 7, 7), rgb(16, 16, 16));
+  border: 2px solid rgb(34, 4, 34);
+  transform: scale(1.02);
+  border-radius: 9px;
+}
+
+.food {
+  background: linear-gradient(black, purple);
+  border-radius: 8px;
+  border: 0.25vmin solid black;
+}
+
+.snake {
+  background: purple;
+  border: 0.25vmin solid black;
+  border-radius: 8px;
+}
