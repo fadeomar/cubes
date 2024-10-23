@@ -1,0 +1,78 @@
+:root {
+  --w: 300px;
+  --transZ: 150px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  font-family: cursive;
+  background: linear-gradient(
+    135deg,
+    #ff9a9e,
+    #fad0c4 20%,
+    #fbc2eb 40%,
+    #a18cd1 60%,
+    #8ec5fc 80%,
+    #a6c1ee 100%
+  );
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  margin: 0 auto;
+  max-width: 1000px;
+  justify-content: center;
+}
+
+.cube-container .cube {
+  width: var(--w);
+  height: var(--w);
+  transform-style: preserve-3d;
+}
+
+.cube-container .cube-face {
+  width: var(--w);
+  height: var(--w);
+  position: absolute;
+  font-size: 30px;
+  color: #000;
+  font-weight: bold;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cube-container .front {
+  background: #8e44ad;
+  transform: translateZ(var(--transZ));
+}
+
+.cube-container .back {
+  background: #e67e22;
+  transform: rotateY(180deg) translateZ(var(--transZ));
+}
+
+.cube-container .left {
+  background: #bdc3c7;
+  transform: rotateY(-90deg) translateZ(var(--transZ));
+}
+
+.cube-container .right {
+  background: #1abc9c;
+  transform: rotateY(90deg) translateZ(var(--transZ));
+}
+
+.cube-container .top {
+  background: #3498db;
+  transform: rotateX(90deg) translateZ(var(--transZ));
+}
+
+.cube-container .bottom {
+  background: #2c3e50;
+  transform: rotateX(-90deg) translateZ(var(--transZ));
+}
