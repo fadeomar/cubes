@@ -1,0 +1,27 @@
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.loader {
+  width: fit-content;
+  font-weight: bold;
+  font-family: cursive;
+  font-size: 40x;
+  padding: 0 8px 12px 0;
+  background: repeating-linear-gradient(90deg, currentColor 0 8%, #0000 0 10%)
+    200% 100%/200% 3px no-repeat;
+  animation: loading 2s steps(6) infinite;
+}
+
+.loader::before {
+  content: "Loading...";
+}
+
+@keyframes loading {
+  to {
+    background-position: 80% 100%;
+  }
+}

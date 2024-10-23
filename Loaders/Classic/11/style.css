@@ -1,0 +1,32 @@
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.loader {
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 30px;
+  display: inline-grid;
+}
+
+.loader::before,
+.loader::after {
+  content: "Loading...";
+  grid-area: 1/1;
+  mask: linear-gradient(90deg, #000 50%, #0000 0) 050%/2ch 100%;
+  animation: loading 1s infinite cubic-bezier(0.5, 220, 0.5, -220);
+}
+
+.loader::after {
+  mask-position: 1ch 50%;
+  --s: -1;
+}
+
+@keyframes loading {
+  100% {
+    transform: translateY(calc(var(--s, 1) * 0.1%));
+  }
+}

@@ -1,0 +1,23 @@
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.loader {
+  font-weight: bold;
+  font-family: cursive;
+  font-size: 30px;
+  animation: loading 1s linear infinite alternate;
+}
+
+.loader::before {
+  content: "Loading...";
+}
+
+@keyframes loading {
+  to {
+    opacity: 0;
+  }
+}

@@ -1,0 +1,37 @@
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.loader {
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 30px;
+  display: inline-grid;
+  overflow: hidden;
+}
+
+.loader::before,
+.loader::after {
+  content: "Loading...";
+  grid-area: 1/1;
+  clip-path: inset(0 -200% 50%);
+  text-shadow: -10ch 0 0;
+  animation: loading 2s infinite;
+}
+
+.loader::after {
+  clip-path: inset(50% -200% 0%);
+  text-shadow: 10ch 0 0;
+  --s: -1;
+  animation-delay: 1s;
+}
+
+@keyframes loading {
+  25%,
+  100% {
+    transform: translateX(calc(var(--s, 1) * 100%));
+  }
+}
