@@ -1,0 +1,38 @@
+body {
+  height: 100vh;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  font-family: cursive;
+}
+
+h1 {
+  font-size: 70px;
+  background: linear-gradient(
+    90deg,
+    #ff0080,
+    #ff8c00,
+    #40e0d0,
+    #8a2be2,
+    #ff0090
+  );
+  color: transparent;
+  background-clip: text;
+  background-size: 500% 500%;
+  animation: gradient 6s ease infinite;
+  text-align: center;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
