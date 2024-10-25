@@ -1,0 +1,28 @@
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.loader {
+  width: fit-content;
+  font-size: 40px;
+  font-family: monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #0000;
+  -webkit-text-stroke: 1px #000;
+  background: conic-gradient(#000 0 0) 0/1ch 100% no-repeat text;
+  animation: fill 1.5s steps(7) infinite alternate;
+}
+
+.loader::before {
+  content: "Loading";
+}
+
+@keyframes fill {
+  to {
+    background-position: calc(100% + 1ch);
+  }
+}

@@ -1,0 +1,38 @@
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.loader {
+  width: fit-content;
+  font-size: 40px;
+  font-family: system-ui;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #0000;
+  -webkit-text-stroke: 1px #000;
+  --g: conic-gradient(#000 0 0) no-repeat text;
+  background: var(--g) 0, var(--g) 100%, var(--g) 0 0, var(--g) 0 100%;
+  animation: fill 2s linear infinite;
+}
+
+.loader::before {
+  content: "Loading";
+}
+
+@keyframes fill {
+  0%,
+  100% {
+    background-size: 0 100%, 0 100%, 100% 0, 100% 0;
+  }
+
+  50% {
+    background-size: 55% 100%, 55% 100%, 100% 0, 100% 0;
+  }
+
+  50.01% {
+    background-size: 0 100%, 0 100%, 100% 55%, 100% 55%;
+  }
+}
