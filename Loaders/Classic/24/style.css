@@ -1,0 +1,31 @@
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.loader {
+  width: fit-content;
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 30px;
+  background: radial-gradient(circle closest-side, #000 94%, #0000)
+    right/calc(200% - 1em) 100%;
+  animation: loading 1s infinite alternate linear;
+}
+
+.loader::before {
+  content: "Loading";
+  line-height: 1em;
+  color: #0000;
+  background: inherit;
+  background-image: radial-gradient(circle closest-side, #fff 94%, #000);
+  background-clip: text;
+}
+
+@keyframes loading {
+  100% {
+    background-position: left;
+  }
+}
