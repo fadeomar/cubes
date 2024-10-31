@@ -1,0 +1,134 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f5f5f5;
+  color: #333;
+  padding: 20px;
+}
+
+/* Control Panel Styling */
+#control-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+#control-panel label {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+#control-panel input[type="text"],
+#control-panel input[type="number"],
+#control-panel input[type="color"] {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+#control-panel input[type="range"] {
+  width: 100%;
+  margin-top: 5px;
+}
+
+#control-panel button {
+  padding: 10px 15px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#control-panel button:hover {
+  background: #0056b3;
+}
+
+#control-panel button#reset-button {
+  background: #6c757d;
+}
+
+#control-panel button#reset-button:hover {
+  background: #565e64;
+}
+
+/* Preview Section Styling */
+#preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 500px;
+  height: 500px;
+  background: #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}
+
+#preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 500px; /* Adjusted to your desired height */
+  background: #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+text {
+  font-family: Arial, sans-serif;
+  dominant-baseline: middle;
+  text-anchor: middle;
+}
+
+/* Code Output Section Styling */
+#code-output {
+  width: 100%;
+  max-width: 600px;
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#code-output h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+#code-output pre {
+  background: #333;
+  color: #f5f5f5;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  overflow-x: auto;
+  max-height: 150px;
+  margin-bottom: 15px;
+}

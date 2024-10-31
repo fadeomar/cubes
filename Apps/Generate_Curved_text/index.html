@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Curved Text Generator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="control-panel">
+      <label
+        >Text:
+        <input type="text" id="text-input" value="Your Text Here" />
+      </label>
+      <label
+        >Radius:
+        <input type="range" id="radius-range" min="50" max="300" value="150" />
+      </label>
+      <label
+        >Arc:
+        <input type="range" id="arc-range" min="0" max="360" value="180" />
+      </label>
+      <label
+        >Start Offset:
+        <input type="range" id="start-offset" min="0" max="100" value="50" />
+      </label>
+      <label
+        >Font Size:
+        <input type="number" id="font-size" min="10" max="50" value="24" />
+      </label>
+      <label
+        >Font Color:
+        <input type="color" id="font-color" value="#000000" />
+      </label>
+      <label>
+        Show Path Line:
+        <input type="checkbox" id="show-path-line" checked />
+      </label>
+      <label>
+        Circular Arc:
+        <input type="checkbox" id="circular-arc" />
+      </label>
+      <label
+        >Letter Spacing:
+        <input type="number" id="letter-spacing" min="0" max="10" value="1" />
+      </label>
+      <button id="reset-button">Reset</button>
+      <button id="generate-button">Generate Code</button>
+    </div>
+
+    <div id="preview">
+      <svg width="500" height="500">
+        <path id="text-path" fill="transparent"></path>
+        <text id="preview-text" text-anchor="middle">
+          <textPath href="#text-path" startOffset="50%">
+            Your Text Here
+          </textPath>
+        </text>
+      </svg>
+    </div>
+
+    <div id="code-output">
+      <h3>HTML Code:</h3>
+      <pre id="html-code"></pre>
+      <h3>CSS Code:</h3>
+      <pre id="css-code"></pre>
+      <h3>JavaScript Code:</h3>
+      <pre id="js-code"></pre>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
