@@ -1,0 +1,17 @@
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: gray;
+  font-family: cursive;
+}
+
+.text {
+  font-size: 32px;
+  fill: wheat;
+}
+
+#curve {
+  fill: transparent;
+}
