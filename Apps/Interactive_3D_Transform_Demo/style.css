@@ -1,0 +1,50 @@
+:root {
+  --transform-style: preserve-3d;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  background: #000;
+  font-family: cursive;
+  color: #fff;
+  perspective: 500px;
+}
+
+.panel {
+  width: 200px;
+  height: 200px;
+  border: 12px solid #26f;
+  font-size: 28px;
+  line-height: 2;
+  transform-style: var(--transform-style);
+  transform: rotateY(50deg);
+}
+
+.text {
+  transform: rotateY(-50deg);
+}
+
+.ui {
+  margin-top: 50px;
+  font-size: 20px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.ui ul {
+  list-style: none;
+}
+
+.slider {
+  margin-top: none;
+}
+
+input[type="range"] {
+  width: 300px;
+  margin-top: 100px;
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive 3D Transform Demo</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="panel">
+      <p class="text">CSS<br />IS <br />AWESOME</p>
+    </div>
+
+    <div class="ui">
+      <ul>
+        <li>
+          <label>
+            <input
+              type="radio"
+              name="transform-style"
+              value="preserve-3d"
+              class="radio"
+              checked
+            />
+            transform-style: preserve-3d
+          </label>
+        </li>
+        <li>
+          <label>
+            <input
+              type="radio"
+              name="transform-style"
+              value="flat"
+              class="radio"
+            />
+            transform-style: flat
+          </label>
+        </li>
+      </ul>
+
+      <div class="slider">
+        <label for="rotation">
+          Rotate Y: <span id="rotation-value">50</span>°
+        </label>
+        <input
+          type="range"
+          name="rotation"
+          id="rotation"
+          min="0"
+          max="360"
+          value="50"
+        />
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
