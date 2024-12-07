@@ -10,8 +10,10 @@ const getRandomElement = (...elements) => {
 const generateRandomCharacter = () => {
   return String.fromCharCode(
     getRandomElement(
-      getRandomInteger(0x3041, 0x30ff),
-      getRandomInteger(0x2000, 0x206f),
+      getRandomInteger(0x0041, 0x005a), // Uppercase English letters (A-Z)
+
+      getRandomInteger(0x0061, 0x007a), // Lowercase English letters (a-z)
+
       getRandomInteger(0x0020, 0x003f)
     )
   );
