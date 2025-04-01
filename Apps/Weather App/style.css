@@ -1,0 +1,371 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #e0e0e0, #b0c4de);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Main Container */
+#main {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Loading Animation */
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(3, 155, 229, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+}
+
+.loading.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  position: relative;
+}
+
+.dot1,
+.dot2 {
+  width: 50%;
+  height: 50%;
+  background-color: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  animation: sk-bounce 2s infinite ease-in-out;
+}
+
+.dot2 {
+  bottom: 0;
+  top: auto;
+  animation-delay: -1s;
+}
+
+@keyframes sk-bounce {
+  0%,
+  100% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+/* Weather Section */
+.bg-primary {
+  background: linear-gradient(135deg, #039be5, #0288d1);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  color: #fff;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.w-section .container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#f_locator {
+  width: 100%;
+}
+
+#location {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 25px;
+  padding: 10px 15px;
+  color: #fff;
+  font-size: 1em;
+  transition: all 0.3s ease;
+}
+
+#location:focus {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #b2ff59;
+  outline: none;
+}
+
+#location::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#date {
+  font-size: 0.9em;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.wi-main {
+  font-size: 4em;
+  margin-right: 15px;
+}
+
+#temperature {
+  font-size: 3.5em;
+  font-weight: bold;
+}
+
+.w-desc-box {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 15px;
+  text-align: center;
+}
+
+#description,
+#humidity {
+  margin: 5px 0;
+  font-size: 1em;
+}
+
+/* Tooltip */
+.tooltiptext {
+  visibility: hidden;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.9em;
+  color: #fff;
+  position: absolute;
+  z-index: 1;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 300px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltiptext.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Unit Switch */
+.unit-block {
+  margin-top: 10px;
+}
+
+.onoffswitch {
+  position: relative;
+  width: 70px;
+  display: inline-block;
+}
+
+.onoffswitch-checkbox {
+  display: none;
+}
+
+.onoffswitch-label {
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #fff;
+  border-radius: 20px;
+}
+
+.onoffswitch-inner {
+  display: block;
+  width: 200%;
+  margin-left: -100%;
+  transition: margin 0.3s ease-in;
+}
+
+.onoffswitch-inner:before,
+.onoffswitch-inner:after {
+  display: block;
+  float: left;
+  width: 50%;
+  height: 26px;
+  padding: 0;
+  line-height: 26px;
+  font-size: 16px;
+  color: #fff;
+  font-weight: bold;
+  box-sizing: border-box;
+}
+
+.onoffswitch-inner:before {
+  content: "°C";
+  padding-left: 10px;
+  background-color: #0288d1;
+}
+
+.onoffswitch-inner:after {
+  content: "°F";
+  padding-right: 10px;
+  background-color: #0288d1;
+  text-align: right;
+}
+
+.onoffswitch-switch {
+  display: block;
+  width: 26px;
+  margin: 0;
+  background: #b2ff59;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 40px;
+  border: 2px solid #fff;
+  border-radius: 20px;
+  transition: all 0.3s ease-in;
+}
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+  margin-left: 0;
+}
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+  right: 0;
+}
+
+/* Forecast Section */
+.card-section {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.days-box {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.states_block {
+  flex: 1 1 22%;
+  min-width: 80px;
+  padding: 10px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.states_block:hover {
+  transform: translateY(-5px);
+}
+
+.day {
+  font-weight: bold;
+  font-size: 1em;
+  color: #333;
+}
+
+.hr-title {
+  border: 0;
+  border-top: 2px solid #039be5;
+  margin: 8px auto;
+  width: 50%;
+}
+
+.days-box .wi {
+  font-size: 2em;
+}
+
+.d-min-temp {
+  color: #039be5;
+}
+
+.d-max-temp {
+  color: #ef5350;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .bg-primary {
+    padding: 15px;
+  }
+
+  #location {
+    font-size: 0.9em;
+    padding: 8px 12px;
+  }
+
+  #temperature {
+    font-size: 2.5em;
+  }
+
+  .wi-main {
+    font-size: 3em;
+  }
+
+  .days-box {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .states_block {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .onoffswitch {
+    width: 60px;
+  }
+
+  .onoffswitch-inner:before,
+  .onoffswitch-inner:after {
+    height: 22px;
+    line-height: 22px;
+    font-size: 14px;
+  }
+
+  .onoffswitch-switch {
+    width: 22px;
+    right: 36px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .states_block {
+    flex: 1 1 45%;
+  }
+
+  #temperature {
+    font-size: 3em;
+  }
+}
+
+@media (min-width: 901px) {
+  .states_block {
+    flex: 1 1 22%;
+  }
+}
