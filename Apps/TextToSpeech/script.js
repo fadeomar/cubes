@@ -79,28 +79,28 @@ async function startRecording() {
 
     // Request audio capture permission
     // Note: Some browsers may require microphone permission even for system audio
-    const stream = await navigator.mediaDevices.getUserMedia({ 
+    const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
         echoCancellation: false,
         noiseSuppression: false,
         autoGainControl: false,
         // Try to capture system audio (browser-dependent)
-        suppressLocalAudioPlayback: false
-      } 
+        suppressLocalAudioPlayback: false,
+      },
     });
-    
+
     audioStream = stream;
 
     // Determine best MIME type
-    let mimeType = 'audio/webm';
+    let mimeType = "audio/webm";
     const types = [
-      'audio/webm;codecs=opus',
-      'audio/webm',
-      'audio/ogg;codecs=opus',
-      'audio/mp4',
-      'audio/wav'
+      "audio/webm;codecs=opus",
+      "audio/webm",
+      "audio/ogg;codecs=opus",
+      "audio/mp4",
+      "audio/wav",
     ];
-    
+
     for (const type of types) {
       if (MediaRecorder.isTypeSupported(type)) {
         mimeType = type;
@@ -125,10 +125,10 @@ async function startRecording() {
         status.textContent = "Audio ready for download!";
         status.className = "status success";
       }
-      
+
       // Stop all tracks
       if (audioStream) {
-        audioStream.getTracks().forEach(track => track.stop());
+        audioStream.getTracks().forEach((track) => track.stop());
       }
     };
 
@@ -144,10 +144,15 @@ async function startRecording() {
   } catch (error) {
     console.error("Error starting recording:", error);
     // Provide helpful message
-    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-      status.textContent = "Microphone permission required for audio recording. Please allow access and try again.";
+    if (
+      error.name === "NotAllowedError" ||
+      error.name === "PermissionDeniedError"
+    ) {
+      status.textContent =
+        "Microphone permission required for audio recording. Please allow access and try again.";
     } else {
-      status.textContent = "Audio recording not available in this browser. Audio will play but cannot be downloaded.";
+      status.textContent =
+        "Audio recording not available in this browser. Audio will play but cannot be downloaded.";
     }
     status.className = "status";
     return false;
@@ -156,7 +161,7 @@ async function startRecording() {
 
 // Stop recording
 function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
     mediaRecorder.stop();
     isRecording = false;
   }
@@ -174,7 +179,7 @@ async function speak() {
 
   // Cancel any ongoing speech
   synth.cancel();
-  
+
   // Reset recording
   audioChunks = [];
   audioBlob = null;
@@ -202,7 +207,8 @@ async function speak() {
     if (recordingStarted) {
       status.textContent = "Speaking and recording...";
     } else {
-      status.textContent = "Speaking... (Recording not available - see note below)";
+      status.textContent =
+        "Speaking... (Recording not available - see note below)";
     }
     status.className = "status speaking";
     speakBtn.disabled = true;
@@ -215,7 +221,7 @@ async function speak() {
   utterance.onend = () => {
     // Stop recording when speech ends
     stopRecording();
-    
+
     // Small delay to ensure recording is processed
     setTimeout(() => {
       if (audioBlob) {
@@ -227,7 +233,7 @@ async function speak() {
         status.className = "status success";
       }
     }, 500);
-    
+
     speakBtn.disabled = false;
     pauseBtn.disabled = true;
     resumeBtn.disabled = true;
@@ -238,7 +244,7 @@ async function speak() {
   utterance.onerror = (event) => {
     // Stop recording on error
     stopRecording();
-    
+
     status.textContent = `Error: ${event.error}`;
     status.className = "status error";
     speakBtn.disabled = false;
@@ -286,14 +292,14 @@ function resume() {
 function stop() {
   synth.cancel();
   stopRecording();
-  
+
   status.textContent = "Stopped.";
   status.className = "status";
   speakBtn.disabled = false;
   pauseBtn.disabled = true;
   resumeBtn.disabled = true;
   stopBtn.disabled = true;
-  
+
   // Enable download if we have recorded audio
   setTimeout(() => {
     if (audioBlob) {
@@ -302,14 +308,15 @@ function stop() {
       downloadBtn.disabled = true;
     }
   }, 300);
-  
+
   isPaused = false;
 }
 
 // Download function
 function downloadAudio() {
   if (!audioBlob) {
-    status.textContent = "No audio available to download. Please speak some text first.";
+    status.textContent =
+      "No audio available to download. Please speak some text first.";
     status.className = "status error";
     return;
   }
@@ -317,39 +324,46 @@ function downloadAudio() {
   try {
     // Create download link
     const url = URL.createObjectURL(audioBlob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.style.display = 'none';
-    
+    a.style.display = "none";
+
     // Determine file extension based on mime type
-    let extension = 'webm';
-    const mimeType = mediaRecorder ? mediaRecorder.mimeType : 'audio/webm';
-    
-    if (mimeType.includes('mp4')) {
-      extension = 'mp4';
-    } else if (mimeType.includes('ogg')) {
-      extension = 'ogg';
-    } else if (mimeType.includes('webm')) {
-      extension = 'webm';
-    } else if (mimeType.includes('wav')) {
-      extension = 'wav';
+    let extension = "webm";
+    const mimeType = mediaRecorder ? mediaRecorder.mimeType : "audio/webm";
+
+    if (mimeType.includes("mp4")) {
+      extension = "mp4";
+    } else if (mimeType.includes("ogg")) {
+      extension = "ogg";
+    } else if (mimeType.includes("webm")) {
+      extension = "webm";
+    } else if (mimeType.includes("wav")) {
+      extension = "wav";
     }
-    
+
     // Create filename with timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-    const textPreview = textInput.value.trim().substring(0, 30).replace(/[^a-z0-9]/gi, '_') || 'speech';
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-")
+      .slice(0, -5);
+    const textPreview =
+      textInput.value
+        .trim()
+        .substring(0, 30)
+        .replace(/[^a-z0-9]/gi, "_") || "speech";
     a.download = `speech_${textPreview}_${timestamp}.${extension}`;
-    
+
     // Trigger download
     document.body.appendChild(a);
     a.click();
-    
+
     // Clean up after a short delay
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }, 100);
-    
+
     status.textContent = "Audio downloaded successfully!";
     status.className = "status success";
   } catch (error) {
