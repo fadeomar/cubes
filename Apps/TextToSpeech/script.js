@@ -177,6 +177,9 @@ async function speak() {
   audioBlob = null;
   downloadBtn.disabled = true;
 
+  // Get selected voice FIRST (before storing settings)
+  const voices = synth.getVoices();
+
   // Store text and settings for download
   lastSpokenText = text;
   lastVoiceSettings = {
@@ -188,9 +191,6 @@ async function speak() {
 
   // Create new utterance
   utterance = new SpeechSynthesisUtterance(text);
-
-  // Get selected voice
-  const voices = synth.getVoices();
   utterance.voice = voices[voiceSelect.value];
 
   // Set speech parameters
@@ -223,36 +223,25 @@ async function speak() {
     // Stop recording when speech ends
     stopRecording();
 
+    // Always enable download button - we'll generate audio on demand
+    downloadBtn.disabled = false;
+
+    // Verify that we stored the text and settings
+    console.log("Speech ended. Stored text:", lastSpokenText ? "Yes" : "No");
+    console.log("Stored settings:", lastVoiceSettings ? "Yes" : "No");
+
     // Wait for MediaRecorder to process the recording
-    // The onstop handler will set audioBlob and enable the download button
     setTimeout(() => {
       if (audioBlob && audioBlob.size > 0) {
         status.textContent = "Speech completed. Audio ready for download!";
         status.className = "status success";
-        downloadBtn.disabled = false;
       } else {
-        // If no audio blob, try to create one from chunks
-        if (audioChunks.length > 0 && mediaRecorder) {
-          audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-          if (audioBlob.size > 0) {
-            downloadBtn.disabled = false;
-            status.textContent = "Speech completed. Audio ready for download!";
-            status.className = "status success";
-          } else {
-            // Enable button anyway - Web Speech API limitation
-            downloadBtn.disabled = false;
-            status.textContent =
-              "Speech completed. (Note: Web Speech API doesn't support direct audio capture)";
-            status.className = "status success";
-          }
-        } else {
-          // Enable button anyway as workaround
-          downloadBtn.disabled = false;
-          status.textContent = "Speech completed.";
-          status.className = "status success";
-        }
+        // No recorded audio, but we can generate it on download
+        status.textContent =
+          "Speech completed. Click 'Download Audio' to generate audio file.";
+        status.className = "status success";
       }
-    }, 1000); // Increased delay to ensure recording is processed
+    }, 500);
 
     speakBtn.disabled = false;
     pauseBtn.disabled = true;
@@ -332,7 +321,7 @@ function stop() {
   isPaused = false;
 }
 
-// Generate audio using TTS API (free Google Translate TTS)
+// Generate audio using TTS API with CORS proxy
 async function generateAudioFile(text, voiceSettings) {
   try {
     status.textContent = "Generating audio file...";
@@ -342,25 +331,90 @@ async function generateAudioFile(text, voiceSettings) {
     const lang = voiceSettings.voice ? voiceSettings.voice.lang : "en-US";
     const langCode = lang.split("-")[0]; // Extract language code (e.g., 'en' from 'en-US')
 
-    // Use Google Translate TTS API (free, no API key required)
-    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(
-      text
-    )}`;
-
-    // Fetch the audio
-    const response = await fetch(ttsUrl);
-    if (!response.ok) {
-      throw new Error("Failed to generate audio");
+    // Split text into chunks (Google TTS has character limit)
+    const maxLength = 200;
+    const textChunks = [];
+    for (let i = 0; i < text.length; i += maxLength) {
+      textChunks.push(text.substring(i, i + maxLength));
     }
 
-    const audioData = await response.arrayBuffer();
-    const blob = new Blob([audioData], { type: "audio/mp3" });
+    // Fetch audio chunks using CORS proxy
+    const audioChunks = [];
+    for (let i = 0; i < textChunks.length; i++) {
+      const chunk = textChunks[i];
+      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(
+        chunk
+      )}`;
 
+      // Use CORS proxy (allorigins.win is a free CORS proxy)
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
+        ttsUrl
+      )}`;
+
+      console.log(`Fetching audio chunk ${i + 1}/${textChunks.length}...`);
+      const response = await fetch(proxyUrl);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to generate audio chunk ${i + 1}: ${response.status} ${
+            response.statusText
+          }`
+        );
+      }
+
+      const audioData = await response.arrayBuffer();
+      if (audioData.byteLength === 0) {
+        throw new Error(`Empty audio data received for chunk ${i + 1}`);
+      }
+      audioChunks.push(audioData);
+      console.log(`Chunk ${i + 1} received: ${audioData.byteLength} bytes`);
+    }
+
+    if (audioChunks.length === 0) {
+      throw new Error("No audio chunks received");
+    }
+
+    // Combine all audio chunks into one blob
+    const totalLength = audioChunks.reduce(
+      (acc, chunk) => acc + chunk.byteLength,
+      0
+    );
+    const combinedAudio = new Uint8Array(totalLength);
+    let offset = 0;
+    for (const chunk of audioChunks) {
+      combinedAudio.set(new Uint8Array(chunk), offset);
+      offset += chunk.byteLength;
+    }
+
+    const blob = new Blob([combinedAudio], { type: "audio/mp3" });
+    console.log("Final audio blob created:", blob.size, "bytes");
     return blob;
   } catch (error) {
     console.error("Error generating audio:", error);
-    // Fallback: create audio using Web Audio API
-    return await generateAudioWithWebAudio(text, voiceSettings);
+    throw error; // Re-throw to be handled by caller
+  }
+}
+
+// Alternative TTS using a different free service
+async function generateAudioWithAlternativeTTS(text, voiceSettings) {
+  try {
+    const lang = voiceSettings.voice ? voiceSettings.voice.lang : "en-US";
+    const langCode = lang.split("-")[0];
+
+    // Use voicerss.org free TTS API (requires API key, but has free tier)
+    // Or use a simpler approach: create audio data manually
+
+    // For now, let's use a workaround: create a minimal WAV file
+    // This is a placeholder - in production you'd use a proper TTS API
+    status.textContent =
+      "Note: Direct audio download requires a TTS API service. The speech played successfully.";
+    status.className = "status";
+
+    // Create a minimal silent audio file as placeholder
+    // In production, replace this with actual TTS API call
+    throw new Error("TTS API not available - please use a TTS service");
+  } catch (error) {
+    throw error;
   }
 }
 
@@ -423,8 +477,14 @@ async function generateAudioWithWebAudio(text, voiceSettings) {
 
 // Download function
 async function downloadAudio() {
+  console.log("Download button clicked");
+  console.log("audioBlob:", audioBlob);
+  console.log("lastSpokenText:", lastSpokenText);
+  console.log("lastVoiceSettings:", lastVoiceSettings);
+
   // If we have a recorded blob, use it
   if (audioBlob && audioBlob.size > 0) {
+    console.log("Using recorded audio blob");
     try {
       const url = URL.createObjectURL(audioBlob);
       const a = document.createElement("a");
@@ -465,15 +525,35 @@ async function downloadAudio() {
   }
 
   // If no recorded blob, generate audio using TTS API
-  if (!lastSpokenText || !lastVoiceSettings) {
+  if (!lastSpokenText) {
     status.textContent =
       "No audio available to download. Please speak some text first.";
     status.className = "status error";
+    console.error("Download failed: lastSpokenText is null/undefined");
     return;
   }
 
+  if (!lastVoiceSettings) {
+    status.textContent =
+      "Voice settings not available. Please speak some text first.";
+    status.className = "status error";
+    console.error("Download failed: lastVoiceSettings is null/undefined");
+    return;
+  }
+
+  console.log("Generating audio for:", lastSpokenText.substring(0, 50), "...");
+  console.log("Voice settings:", lastVoiceSettings);
+
   try {
+    status.textContent = "Generating audio file, please wait...";
+    status.className = "status speaking";
+
     const blob = await generateAudioFile(lastSpokenText, lastVoiceSettings);
+    console.log("Audio blob generated:", blob ? blob.size + " bytes" : "null");
+
+    if (!blob || blob.size === 0) {
+      throw new Error("Generated audio file is empty");
+    }
 
     if (blob && blob.size > 0) {
       const url = URL.createObjectURL(blob);
@@ -503,8 +583,16 @@ async function downloadAudio() {
     }
   } catch (error) {
     console.error("Download error:", error);
-    status.textContent = "Error generating audio file. Please try again.";
+    const errorMsg = error.message || "Unknown error";
+    status.textContent = `Error: ${errorMsg}. Note: Audio download requires internet connection and may be blocked by browser security settings.`;
     status.className = "status error";
+
+    // Show helpful message
+    setTimeout(() => {
+      status.textContent =
+        "Tip: Make sure you have internet connection and try again. Some browsers block TTS API requests.";
+      status.className = "status";
+    }, 5000);
   }
 }
 
