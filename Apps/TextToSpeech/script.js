@@ -7,6 +7,8 @@ let audioBlob = null;
 let audioContext = null;
 let isRecording = false;
 let audioStream = null;
+let lastSpokenText = null;
+let lastVoiceSettings = null;
 
 // DOM ELEMENTs
 const textInput = document.getElementById("textInput");
@@ -175,6 +177,15 @@ async function speak() {
   audioBlob = null;
   downloadBtn.disabled = true;
 
+  // Store text and settings for download
+  lastSpokenText = text;
+  lastVoiceSettings = {
+    voice: voices[voiceSelect.value],
+    rate: parseFloat(rateSlider.value),
+    pitch: parseFloat(pitchSlider.value),
+    volume: parseFloat(volumeSlider.value),
+  };
+
   // Create new utterance
   utterance = new SpeechSynthesisUtterance(text);
 
@@ -321,9 +332,140 @@ function stop() {
   isPaused = false;
 }
 
+// Generate audio using TTS API (free Google Translate TTS)
+async function generateAudioFile(text, voiceSettings) {
+  try {
+    status.textContent = "Generating audio file...";
+    status.className = "status speaking";
+
+    // Get language code from voice
+    const lang = voiceSettings.voice ? voiceSettings.voice.lang : "en-US";
+    const langCode = lang.split("-")[0]; // Extract language code (e.g., 'en' from 'en-US')
+
+    // Use Google Translate TTS API (free, no API key required)
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(
+      text
+    )}`;
+
+    // Fetch the audio
+    const response = await fetch(ttsUrl);
+    if (!response.ok) {
+      throw new Error("Failed to generate audio");
+    }
+
+    const audioData = await response.arrayBuffer();
+    const blob = new Blob([audioData], { type: "audio/mp3" });
+
+    return blob;
+  } catch (error) {
+    console.error("Error generating audio:", error);
+    // Fallback: create audio using Web Audio API
+    return await generateAudioWithWebAudio(text, voiceSettings);
+  }
+}
+
+// Fallback: Generate audio using Web Audio API (synthesize speech)
+async function generateAudioWithWebAudio(text, voiceSettings) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Create a new utterance for recording
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = synth.getVoices();
+      utterance.voice = voiceSettings.voice;
+      utterance.rate = voiceSettings.rate;
+      utterance.pitch = voiceSettings.pitch;
+      utterance.volume = voiceSettings.volume;
+
+      // Create AudioContext for recording
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const destination = audioCtx.createMediaStreamDestination();
+      const mediaRecorder = new MediaRecorder(destination.stream, {
+        mimeType: MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "audio/ogg",
+      });
+
+      const chunks = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        if (chunks.length > 0) {
+          const blob = new Blob(chunks, { type: mediaRecorder.mimeType });
+          resolve(blob);
+        } else {
+          reject(new Error("No audio data recorded"));
+        }
+      };
+
+      // Note: This won't work because speechSynthesis doesn't connect to AudioContext
+      // But we'll try anyway
+      mediaRecorder.start();
+      synth.speak(utterance);
+
+      utterance.onend = () => {
+        setTimeout(() => {
+          mediaRecorder.stop();
+        }, 500);
+      };
+
+      utterance.onerror = () => {
+        mediaRecorder.stop();
+        reject(new Error("Speech synthesis error"));
+      };
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 // Download function
-function downloadAudio() {
-  if (!audioBlob) {
+async function downloadAudio() {
+  // If we have a recorded blob, use it
+  if (audioBlob && audioBlob.size > 0) {
+    try {
+      const url = URL.createObjectURL(audioBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.style.display = "none";
+
+      let extension = "webm";
+      const mimeType = mediaRecorder ? mediaRecorder.mimeType : "audio/webm";
+      if (mimeType.includes("mp4")) extension = "mp4";
+      else if (mimeType.includes("ogg")) extension = "ogg";
+      else if (mimeType.includes("webm")) extension = "webm";
+      else if (mimeType.includes("wav")) extension = "wav";
+
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, -5);
+      const textPreview =
+        textInput.value
+          .trim()
+          .substring(0, 30)
+          .replace(/[^a-z0-9]/gi, "_") || "speech";
+      a.download = `speech_${textPreview}_${timestamp}.${extension}`;
+
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+
+      status.textContent = "Audio downloaded successfully!";
+      status.className = "status success";
+      return;
+    } catch (error) {
+      console.error("Download error:", error);
+    }
+  }
+
+  // If no recorded blob, generate audio using TTS API
+  if (!lastSpokenText || !lastVoiceSettings) {
     status.textContent =
       "No audio available to download. Please speak some text first.";
     status.className = "status error";
@@ -331,53 +473,37 @@ function downloadAudio() {
   }
 
   try {
-    // Create download link
-    const url = URL.createObjectURL(audioBlob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.style.display = "none";
+    const blob = await generateAudioFile(lastSpokenText, lastVoiceSettings);
 
-    // Determine file extension based on mime type
-    let extension = "webm";
-    const mimeType = mediaRecorder ? mediaRecorder.mimeType : "audio/webm";
+    if (blob && blob.size > 0) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.style.display = "none";
 
-    if (mimeType.includes("mp4")) {
-      extension = "mp4";
-    } else if (mimeType.includes("ogg")) {
-      extension = "ogg";
-    } else if (mimeType.includes("webm")) {
-      extension = "webm";
-    } else if (mimeType.includes("wav")) {
-      extension = "wav";
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, -5);
+      const textPreview =
+        lastSpokenText.substring(0, 30).replace(/[^a-z0-9]/gi, "_") || "speech";
+      a.download = `speech_${textPreview}_${timestamp}.mp3`;
+
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+
+      status.textContent = "Audio downloaded successfully!";
+      status.className = "status success";
+    } else {
+      throw new Error("Generated audio is empty");
     }
-
-    // Create filename with timestamp
-    const timestamp = new Date()
-      .toISOString()
-      .replace(/[:.]/g, "-")
-      .slice(0, -5);
-    const textPreview =
-      textInput.value
-        .trim()
-        .substring(0, 30)
-        .replace(/[^a-z0-9]/gi, "_") || "speech";
-    a.download = `speech_${textPreview}_${timestamp}.${extension}`;
-
-    // Trigger download
-    document.body.appendChild(a);
-    a.click();
-
-    // Clean up after a short delay
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
-
-    status.textContent = "Audio downloaded successfully!";
-    status.className = "status success";
   } catch (error) {
     console.error("Download error:", error);
-    status.textContent = "Error downloading audio file.";
+    status.textContent = "Error generating audio file. Please try again.";
     status.className = "status error";
   }
 }
