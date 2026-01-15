@@ -14,12 +14,12 @@
 
         <div class="input-section">
           <textarea
+            name="textInput"
             id="textInput"
             placeholder="Enter text to convert to speech..."
             rows="6"
           ></textarea>
         </div>
-
         <div class="controls-section">
           <div class="control-group">
             <label for="voiceSelect">Voice:</label>
@@ -58,6 +58,7 @@
             >
             <input
               type="range"
+              name="volumeSlider"
               id="volumeSlider"
               min="0"
               max="1"
@@ -72,6 +73,7 @@
             <span class="btn-icon">🔊</span>
             Speak
           </button>
+
           <button id="pauseBtn" class="btn btn-secondary" disabled>
             <span class="btn-icon">⏸</span>
             Pause
@@ -83,6 +85,10 @@
           <button id="stopBtn" class="btn btn-danger" disabled>
             <span class="btn-icon">⏹</span>
             Stop
+          </button>
+          <button id="downloadBtn" class="btn btn-success" disabled>
+            <span class="btn-icon">💾</span>
+            Download Audio
           </button>
         </div>
 
