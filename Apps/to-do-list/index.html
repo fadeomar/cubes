@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern To-Do List</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="container">
+        <h1 class="logo">📋 TaskMaster</h1>
+        <div class="header-actions">
+          <button class="btn-icon" id="themeToggle" aria-label="Toggle theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+          <button class="btn-icon" id="statsBtn" aria-label="View statistics">
+            <span>📊</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-content">
+          <!-- Lists Section -->
+          <section class="lists-section">
+            <div class="section-header">
+              <h2>Lists</h2>
+              <button
+                class="btn-icon btn-small"
+                id="addListBtn"
+                aria-label="Add new list"
+              >
+                <span>➕</span>
+              </button>
+            </div>
+            <ul class="lists-menu" id="listsMenu">
+              <li class="list-item active" data-list-id="all">
+                <span class="list-icon">📌</span>
+                <span class="list-name">All Tasks</span>
+                <span class="task-count" id="allTasksCount">0</span>
+              </li>
+              <li class="list-item" data-list-id="today">
+                <span class="list-icon">📅</span>
+                <span class="list-name">Today</span>
+                <span class="task-count" id="todayTasksCount">0</span>
+              </li>
+              <li class="list-item" data-list-id="completed">
+                <span class="list-icon">✅</span>
+                <span class="list-name">Completed</span>
+                <span class="task-count" id="completedTasksCount">0</span>
+              </li>
+              <li class="list-item" data-list-id="trash">
+                <span class="list-icon">🗑️</span>
+                <span class="list-name">Trash</span>
+                <span class="task-count" id="trashTasksCount">0</span>
+              </li>
+            </ul>
+            <ul class="lists-menu custom-lists" id="customLists">
+              <!-- Custom lists will be added here -->
+            </ul>
+          </section>
+
+          <!-- Filters Section -->
+          <section class="filters-section">
+            <h2>Filters</h2>
+            <div class="filter-group">
+              <label class="filter-label">Priority</label>
+              <select class="filter-select" id="priorityFilter">
+                <option value="all">All Priorities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Sort By</label>
+              <select class="filter-select" id="sortFilter">
+                <option value="date">Due Date</option>
+                <option value="priority">Priority</option>
+                <option value="created">Creation Date</option>
+                <option value="alphabetical">Alphabetical</option>
+              </select>
+            </div>
+          </section>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="content-area">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="search-box">
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="Search tasks..."
+            />
+            <span class="search-icon">🔍</span>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn btn-primary" id="addTaskBtn">
+              <span>➕</span> Add Task
+            </button>
+            <button
+              class="btn btn-secondary"
+              id="voiceInputBtn"
+              title="Voice Input"
+            >
+              <span>🎤</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tasks Container -->
+        <div class="tasks-container">
+          <div class="tasks-header">
+            <h2 id="currentListTitle">All Tasks</h2>
+            <span class="tasks-count" id="tasksCount">0 tasks</span>
+          </div>
+          <div class="tasks-list" id="tasksList">
+            <!-- Tasks will be dynamically added here -->
+          </div>
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📝</div>
+            <p>No tasks yet. Add your first task to get started!</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Add/Edit Task Modal -->
+    <div class="modal" id="taskModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Add New Task</h3>
+          <button
+            class="btn-icon modal-close"
+            id="closeTaskModal"
+            aria-label="Close"
+          >
+            <span>✕</span>
+          </button>
+        </div>
+        <form id="taskForm" class="modal-body">
+          <div class="form-group">
+            <label for="taskTitle">Title *</label>
+            <input
+              type="text"
+              id="taskTitle"
+              required
+              placeholder="Enter task title"
+            />
+          </div>
+          <div class="form-group">
+            <label for="taskDescription">Description</label>
+            <textarea
+              id="taskDescription"
+              rows="3"
+              placeholder="Add details..."
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="taskDueDate">Due Date</label>
+              <input type="datetime-local" id="taskDueDate" />
+            </div>
+            <div class="form-group">
+              <label for="taskPriority">Priority</label>
+              <select id="taskPriority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="taskList">List / Category</label>
+            <select id="taskList">
+              <option value="default">Default</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="taskRecurring" />
+              <span>Recurring Task</span>
+            </label>
+            <select id="taskRecurrence" class="recurrence-select" disabled>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="taskTags">Tags (comma-separated)</label>
+            <input
+              type="text"
+              id="taskTags"
+              placeholder="work, urgent, shopping"
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelTaskBtn">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Save Task</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add List Modal -->
+    <div class="modal" id="listModal">
+      <div class="modal-content modal-small">
+        <div class="modal-header">
+          <h3>Create New List</h3>
+          <button
+            class="btn-icon modal-close"
+            id="closeListModal"
+            aria-label="Close"
+          >
+            <span>✕</span>
+          </button>
+        </div>
+        <form id="listForm" class="modal-body">
+          <div class="form-group">
+            <label for="listName">List Name *</label>
+            <input
+              type="text"
+              id="listName"
+              required
+              placeholder="e.g., Work, Personal"
+            />
+          </div>
+          <div class="form-group">
+            <label for="listColor">Color</label>
+            <input type="color" id="listColor" value="#6366f1" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelListBtn">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Create List</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Task Details Modal -->
+    <div class="modal" id="taskDetailsModal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3 id="detailsTitle">Task Details</h3>
+          <button
+            class="btn-icon modal-close"
+            id="closeDetailsModal"
+            aria-label="Close"
+          >
+            <span>✕</span>
+          </button>
+        </div>
+        <div class="modal-body" id="taskDetailsContent">
+          <!-- Task details will be populated here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div class="modal" id="statsModal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Statistics & Analytics</h3>
+          <button
+            class="btn-icon modal-close"
+            id="closeStatsModal"
+            aria-label="Close"
+          >
+            <span>✕</span>
+          </button>
+        </div>
+        <div class="modal-body" id="statsContent">
+          <!-- Statistics will be populated here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
