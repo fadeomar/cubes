@@ -1,612 +1,327 @@
-let synth = window.speechSynthesis;
+"use strict";
+
+const synth = window.speechSynthesis;
 let utterance = null;
-let isPaused = false;
-let mediaRecorder = null;
-let audioChunks = [];
-let audioBlob = null;
-let audioContext = null;
-let isRecording = false;
-let audioStream = null;
+
+// Store last preview settings for download generation
 let lastSpokenText = null;
 let lastVoiceSettings = null;
 
-// DOM ELEMENTs
+// Last generated downloadable blob (mp3)
+let downloadBlob = null;
+
+// DOM
 const textInput = document.getElementById("textInput");
 const voiceSelect = document.getElementById("voiceSelect");
+const reloadVoicesBtn = document.getElementById("reloadVoicesBtn");
+
 const rateSlider = document.getElementById("rateSlider");
 const pitchSlider = document.getElementById("pitchSlider");
 const volumeSlider = document.getElementById("volumeSlider");
+
 const rateValue = document.getElementById("rateValue");
 const pitchValue = document.getElementById("pitchValue");
+const volumeValue = document.getElementById("volumeValue");
+
 const speakBtn = document.getElementById("speakBtn");
 const pauseBtn = document.getElementById("pauseBtn");
 const resumeBtn = document.getElementById("resumeBtn");
 const stopBtn = document.getElementById("stopBtn");
 const downloadBtn = document.getElementById("downloadBtn");
+
 const status = document.getElementById("status");
 
-// Load available voices
+// -------------------------
+// UI helpers
+// -------------------------
+function setStatus(message, type = "") {
+  status.textContent = message;
+  status.className = type ? `status ${type}` : "status";
+}
+
+function setUiState(state) {
+  // "idle" | "speaking" | "paused"
+  const isSpeaking = state === "speaking";
+  const isPaused = state === "paused";
+
+  speakBtn.disabled = isSpeaking;
+  pauseBtn.disabled = !isSpeaking || isPaused;
+  resumeBtn.disabled = !isPaused;
+  stopBtn.disabled = !(isSpeaking || isPaused);
+
+  // download enabled if we have last spoken text (we can generate on demand)
+  downloadBtn.disabled = !lastSpokenText;
+}
+
+// -------------------------
+// Voices
+// -------------------------
+function isEnglishVoice(v) {
+  return typeof v.lang === "string" && v.lang.toLowerCase().startsWith("en");
+}
+
 function loadVoices() {
   const voices = synth.getVoices();
 
-  // clear existing options
+  // Sort: English first, then localService first, then by name
+  const sorted = [...voices].sort((a, b) => {
+    const aEn = isEnglishVoice(a) ? 1 : 0;
+    const bEn = isEnglishVoice(b) ? 1 : 0;
+    if (aEn !== bEn) return bEn - aEn;
+
+    if (a.localService !== b.localService)
+      return (b.localService ? 1 : 0) - (a.localService ? 1 : 0);
+    if (a.lang !== b.lang) return a.lang.localeCompare(b.lang);
+    return a.name.localeCompare(b.name);
+  });
+
   voiceSelect.innerHTML = "";
 
-  // Add voices to select dropdown
-  voices.forEach((voice, index) => {
+  sorted.forEach((voice) => {
     const option = document.createElement("option");
-    option.value = index;
-    option.textContent = `${voice.name} (${voice.lang})`;
+    option.value = String(voices.indexOf(voice)); // preserve original index
+    const tag = voice.default ? " • default" : "";
+    const local = voice.localService ? "" : " • cloud";
+    option.textContent = `${voice.name} (${voice.lang})${tag}${local}`;
     voiceSelect.appendChild(option);
   });
 
-  // Set default voice if available
+  // Select default voice, prefer English default if available
   if (voices.length > 0) {
-    const defaultVoice = voices.find((voice) => voice.default) || voices[0];
-    const defaultIndex = voices.indexOf(defaultVoice);
-    voiceSelect.value = defaultIndex;
+    const defaultVoice =
+      voices.find((v) => v.default && isEnglishVoice(v)) ||
+      voices.find((v) => v.default) ||
+      sorted.find(isEnglishVoice) ||
+      sorted[0];
+
+    voiceSelect.value = String(voices.indexOf(defaultVoice));
   }
 }
 
-// load voices when they become available
+// Most browsers fire this event async
 if (speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = loadVoices;
 }
+loadVoices();
 
-loadVoices(); // Fallback for browsers that don't fire the event
-
-// Update slider value displays
-rateSlider.addEventListener("input", (e) => {
-  rateValue.textContent = e.target.value;
+reloadVoicesBtn.addEventListener("click", () => {
+  loadVoices();
+  setStatus("Voices reloaded.", "success");
+  setTimeout(() => setStatus(""), 1500);
 });
 
-pitchSlider.addEventListener("input", (e) => {
-  pitchValue.textContent = e.target.value;
-});
+// -------------------------
+// Slider display
+// -------------------------
+rateSlider.addEventListener(
+  "input",
+  (e) => (rateValue.textContent = e.target.value),
+);
+pitchSlider.addEventListener(
+  "input",
+  (e) => (pitchValue.textContent = e.target.value),
+);
+volumeSlider.addEventListener(
+  "input",
+  (e) => (volumeValue.textContent = e.target.value),
+);
 
-volumeSlider.addEventListener("input", (e) => {
-  volumeValue.textContent = e.target.value;
-});
-
-// Record speech using a workaround technique
-// Since Web Speech API doesn't expose audio streams, we'll use a different approach:
-// We'll synthesize the speech twice - once to play and once to record via AudioContext
-// However, since speechSynthesis doesn't connect to AudioContext, we need a workaround
-async function startRecording() {
-  try {
-    // Create AudioContext
-    if (!audioContext) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    // Create a MediaStreamDestination to capture audio
-    const destination = audioContext.createMediaStreamDestination();
-    audioStream = destination.stream;
-
-    // Determine best MIME type
-    let mimeType = "audio/webm";
-    const types = [
-      "audio/webm;codecs=opus",
-      "audio/webm",
-      "audio/ogg;codecs=opus",
-      "audio/mp4",
-      "audio/wav",
-    ];
-
-    for (const type of types) {
-      if (MediaRecorder.isTypeSupported(type)) {
-        mimeType = type;
-        break;
-      }
-    }
-
-    // Create MediaRecorder from the destination stream
-    mediaRecorder = new MediaRecorder(audioStream, { mimeType });
-    audioChunks = [];
-
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data && event.data.size > 0) {
-        audioChunks.push(event.data);
-        console.log("Audio chunk received:", event.data.size, "bytes");
-      }
-    };
-
-    mediaRecorder.onstop = () => {
-      console.log("Recording stopped. Total chunks:", audioChunks.length);
-      if (audioChunks.length > 0) {
-        audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-        console.log("Audio blob created:", audioBlob.size, "bytes");
-        downloadBtn.disabled = false;
-        status.textContent = "Audio ready for download!";
-        status.className = "status success";
-      } else {
-        console.warn(
-          "No audio chunks recorded - this is expected with Web Speech API limitation"
-        );
-        // Don't show error, just inform user
-        status.textContent =
-          "Speech completed. (Note: Direct audio capture from Web Speech API is not supported by browsers)";
-        status.className = "status success";
-      }
-    };
-
-    mediaRecorder.onerror = (event) => {
-      console.error("MediaRecorder error:", event.error);
-      status.textContent = "Recording error occurred.";
-      status.className = "status error";
-    };
-
-    mediaRecorder.start(100); // Collect data every 100ms
-    isRecording = true;
-    console.log(
-      "Recording started (note: Web Speech API doesn't expose audio streams)"
-    );
-    return true;
-  } catch (error) {
-    console.error("Error starting recording:", error);
-    status.textContent =
-      "Audio recording initialization failed. Audio will play but cannot be downloaded.";
-    status.className = "status";
-    return false;
-  }
-}
-
-// Stop recording
-function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    mediaRecorder.stop();
-    isRecording = false;
-  }
-}
-
-// Speak function with recording capability
-async function speak() {
+// -------------------------
+// Speech controls
+// -------------------------
+function speak() {
   const text = textInput.value.trim();
-
   if (!text) {
-    status.textContent = "Please enter some text to speak.";
-    status.className = "status error";
+    setStatus("Please enter some text to speak.", "error");
     return;
   }
 
   // Cancel any ongoing speech
   synth.cancel();
 
-  // Reset recording
-  audioChunks = [];
-  audioBlob = null;
-  downloadBtn.disabled = true;
-
-  // Get selected voice FIRST (before storing settings)
   const voices = synth.getVoices();
+  const selectedVoice = voices[Number(voiceSelect.value)] || voices[0];
 
-  // Store text and settings for download
+  // Store for download
   lastSpokenText = text;
   lastVoiceSettings = {
-    voice: voices[voiceSelect.value],
+    voice: selectedVoice,
     rate: parseFloat(rateSlider.value),
     pitch: parseFloat(pitchSlider.value),
     volume: parseFloat(volumeSlider.value),
   };
 
-  // Create new utterance
+  // Clear old blob (we’ll regenerate on demand)
+  downloadBlob = null;
+
   utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = voices[voiceSelect.value];
+  utterance.voice = selectedVoice;
+  utterance.rate = lastVoiceSettings.rate;
+  utterance.pitch = lastVoiceSettings.pitch;
+  utterance.volume = lastVoiceSettings.volume;
 
-  // Set speech parameters
-  utterance.rate = parseFloat(rateSlider.value);
-  utterance.pitch = parseFloat(pitchSlider.value);
-  utterance.volume = parseFloat(volumeSlider.value);
-
-  // Start recording before speaking
-  // Note: This is a limitation - Web Speech API doesn't expose audio streams
-  // The recording will be set up but won't capture speechSynthesis output
-  // We'll still enable the download button after speech completes as a workaround
-  const recordingStarted = await startRecording();
-
-  // Event handlers
   utterance.onstart = () => {
-    if (recordingStarted) {
-      status.textContent = "Speaking and recording...";
-    } else {
-      status.textContent = "Speaking... (Recording not available)";
-    }
-    status.className = "status speaking";
-    speakBtn.disabled = true;
-    pauseBtn.disabled = false;
-    resumeBtn.disabled = true;
-    stopBtn.disabled = false;
-    isPaused = false;
+    setUiState("speaking");
+    setStatus("Speaking...", "speaking");
   };
 
   utterance.onend = () => {
-    // Stop recording when speech ends
-    stopRecording();
-
-    // Always enable download button - we'll generate audio on demand
-    downloadBtn.disabled = false;
-
-    // Verify that we stored the text and settings
-    console.log("Speech ended. Stored text:", lastSpokenText ? "Yes" : "No");
-    console.log("Stored settings:", lastVoiceSettings ? "Yes" : "No");
-
-    // Wait for MediaRecorder to process the recording
-    setTimeout(() => {
-      if (audioBlob && audioBlob.size > 0) {
-        status.textContent = "Speech completed. Audio ready for download!";
-        status.className = "status success";
-      } else {
-        // No recorded audio, but we can generate it on download
-        status.textContent =
-          "Speech completed. Click 'Download Audio' to generate audio file.";
-        status.className = "status success";
-      }
-    }, 500);
-
-    speakBtn.disabled = false;
-    pauseBtn.disabled = true;
-    resumeBtn.disabled = true;
-    stopBtn.disabled = false;
-    isPaused = false;
+    setUiState("idle");
+    setStatus("Completed. You can download MP3 now.", "success");
   };
 
-  utterance.onerror = (event) => {
-    // Stop recording on error
-    stopRecording();
-
-    status.textContent = `Error: ${event.error}`;
-    status.className = "status error";
-    speakBtn.disabled = false;
-    pauseBtn.disabled = true;
-    resumeBtn.disabled = true;
-    stopBtn.disabled = true;
-    downloadBtn.disabled = true;
+  utterance.onerror = (e) => {
+    setUiState("idle");
+    setStatus(`Error: ${e.error}`, "error");
   };
 
-  try {
-    // Speak
-    synth.speak(utterance);
-  } catch (error) {
-    console.error("Error speaking:", error);
-    status.textContent = "Error: Could not start speech synthesis.";
-    status.className = "status error";
-  }
+  synth.speak(utterance);
 }
 
-// Pause function
 function pause() {
   if (synth.speaking && !synth.paused) {
     synth.pause();
-    status.textContent = "Paused.";
-    status.className = "status paused";
-    pauseBtn.disabled = true;
-    resumeBtn.disabled = false;
-    isPaused = true;
+    setUiState("paused");
+    setStatus("Paused.", "paused");
   }
 }
 
-// Resume function
 function resume() {
   if (synth.speaking && synth.paused) {
     synth.resume();
-    status.textContent = "Speaking...";
-    status.className = "status speaking";
-    pauseBtn.disabled = false;
-    resumeBtn.disabled = true;
-    isPaused = false;
+    setUiState("speaking");
+    setStatus("Speaking...", "speaking");
   }
 }
 
-// Stop function
 function stop() {
   synth.cancel();
-  stopRecording();
-
-  status.textContent = "Stopped.";
-  status.className = "status";
-  speakBtn.disabled = false;
-  pauseBtn.disabled = true;
-  resumeBtn.disabled = true;
-  stopBtn.disabled = true;
-
-  // Enable download if we have recorded audio
-  setTimeout(() => {
-    if (audioBlob) {
-      downloadBtn.disabled = false;
-    } else {
-      downloadBtn.disabled = true;
-    }
-  }, 300);
-
-  isPaused = false;
+  setUiState("idle");
+  setStatus("Stopped.", "");
 }
 
-// Generate audio using TTS API with CORS proxy
-async function generateAudioFile(text, voiceSettings) {
-  try {
-    status.textContent = "Generating audio file...";
-    status.className = "status speaking";
+// -------------------------
+// Download (Generate MP3 using online TTS endpoint)
+// NOTE: This audio is NOT the same voice as speechSynthesis.
+// -------------------------
+async function generateMp3ViaOnlineTTS(text, voiceSettings) {
+  // Use language code; prefer English for your case
+  const lang = voiceSettings?.voice?.lang || "en-US";
+  const langCode = lang.split("-")[0] || "en";
 
-    // Get language code from voice
-    const lang = voiceSettings.voice ? voiceSettings.voice.lang : "en-US";
-    const langCode = lang.split("-")[0]; // Extract language code (e.g., 'en' from 'en-US')
-
-    // Split text into chunks (Google TTS has character limit)
-    const maxLength = 200;
-    const textChunks = [];
-    for (let i = 0; i < text.length; i += maxLength) {
-      textChunks.push(text.substring(i, i + maxLength));
-    }
-
-    // Fetch audio chunks using CORS proxy
-    const audioChunks = [];
-    for (let i = 0; i < textChunks.length; i++) {
-      const chunk = textChunks[i];
-      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(
-        chunk
-      )}`;
-
-      // Use CORS proxy (allorigins.win is a free CORS proxy)
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
-        ttsUrl
-      )}`;
-
-      console.log(`Fetching audio chunk ${i + 1}/${textChunks.length}...`);
-      const response = await fetch(proxyUrl);
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to generate audio chunk ${i + 1}: ${response.status} ${
-            response.statusText
-          }`
-        );
-      }
-
-      const audioData = await response.arrayBuffer();
-      if (audioData.byteLength === 0) {
-        throw new Error(`Empty audio data received for chunk ${i + 1}`);
-      }
-      audioChunks.push(audioData);
-      console.log(`Chunk ${i + 1} received: ${audioData.byteLength} bytes`);
-    }
-
-    if (audioChunks.length === 0) {
-      throw new Error("No audio chunks received");
-    }
-
-    // Combine all audio chunks into one blob
-    const totalLength = audioChunks.reduce(
-      (acc, chunk) => acc + chunk.byteLength,
-      0
-    );
-    const combinedAudio = new Uint8Array(totalLength);
-    let offset = 0;
-    for (const chunk of audioChunks) {
-      combinedAudio.set(new Uint8Array(chunk), offset);
-      offset += chunk.byteLength;
-    }
-
-    const blob = new Blob([combinedAudio], { type: "audio/mp3" });
-    console.log("Final audio blob created:", blob.size, "bytes");
-    return blob;
-  } catch (error) {
-    console.error("Error generating audio:", error);
-    throw error; // Re-throw to be handled by caller
+  // Chunk text to avoid limits
+  const maxLength = 200;
+  const parts = [];
+  for (let i = 0; i < text.length; i += maxLength) {
+    parts.push(text.substring(i, i + maxLength));
   }
-}
 
-// Alternative TTS using a different free service
-async function generateAudioWithAlternativeTTS(text, voiceSettings) {
-  try {
-    const lang = voiceSettings.voice ? voiceSettings.voice.lang : "en-US";
-    const langCode = lang.split("-")[0];
+  const buffers = [];
 
-    // Use voicerss.org free TTS API (requires API key, but has free tier)
-    // Or use a simpler approach: create audio data manually
+  for (let i = 0; i < parts.length; i++) {
+    const chunk = parts[i].trim();
+    if (!chunk) continue;
 
-    // For now, let's use a workaround: create a minimal WAV file
-    // This is a placeholder - in production you'd use a proper TTS API
-    status.textContent =
-      "Note: Direct audio download requires a TTS API service. The speech played successfully.";
-    status.className = "status";
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(
+      chunk,
+    )}`;
 
-    // Create a minimal silent audio file as placeholder
-    // In production, replace this with actual TTS API call
-    throw new Error("TTS API not available - please use a TTS service");
-  } catch (error) {
-    throw error;
+    // PUBLIC CORS PROXY (may break). Best practice: self-host proxy or use official API.
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(ttsUrl)}`;
+
+    const res = await fetch(proxyUrl);
+    if (!res.ok)
+      throw new Error(`Failed to fetch audio chunk ${i + 1}/${parts.length}`);
+
+    const arr = await res.arrayBuffer();
+    if (!arr || arr.byteLength === 0)
+      throw new Error(`Empty audio data for chunk ${i + 1}`);
+
+    buffers.push(arr);
   }
+
+  if (buffers.length === 0) throw new Error("No audio data received.");
+
+  // Combine buffers
+  const total = buffers.reduce((acc, b) => acc + b.byteLength, 0);
+  const merged = new Uint8Array(total);
+
+  let offset = 0;
+  for (const b of buffers) {
+    merged.set(new Uint8Array(b), offset);
+    offset += b.byteLength;
+  }
+
+  return new Blob([merged], { type: "audio/mp3" });
 }
 
-// Fallback: Generate audio using Web Audio API (synthesize speech)
-async function generateAudioWithWebAudio(text, voiceSettings) {
-  return new Promise((resolve, reject) => {
-    try {
-      // Create a new utterance for recording
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voices = synth.getVoices();
-      utterance.voice = voiceSettings.voice;
-      utterance.rate = voiceSettings.rate;
-      utterance.pitch = voiceSettings.pitch;
-      utterance.volume = voiceSettings.volume;
+function downloadBlobAsFile(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.style.display = "none";
 
-      // Create AudioContext for recording
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const destination = audioCtx.createMediaStreamDestination();
-      const mediaRecorder = new MediaRecorder(destination.stream, {
-        mimeType: MediaRecorder.isTypeSupported("audio/webm")
-          ? "audio/webm"
-          : "audio/ogg",
-      });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 
-      const chunks = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        if (chunks.length > 0) {
-          const blob = new Blob(chunks, { type: mediaRecorder.mimeType });
-          resolve(blob);
-        } else {
-          reject(new Error("No audio data recorded"));
-        }
-      };
-
-      // Note: This won't work because speechSynthesis doesn't connect to AudioContext
-      // But we'll try anyway
-      mediaRecorder.start();
-      synth.speak(utterance);
-
-      utterance.onend = () => {
-        setTimeout(() => {
-          mediaRecorder.stop();
-        }, 500);
-      };
-
-      utterance.onerror = () => {
-        mediaRecorder.stop();
-        reject(new Error("Speech synthesis error"));
-      };
-    } catch (error) {
-      reject(error);
-    }
-  });
+  URL.revokeObjectURL(url);
 }
 
-// Download function
 async function downloadAudio() {
-  console.log("Download button clicked");
-  console.log("audioBlob:", audioBlob);
-  console.log("lastSpokenText:", lastSpokenText);
-  console.log("lastVoiceSettings:", lastVoiceSettings);
-
-  // If we have a recorded blob, use it
-  if (audioBlob && audioBlob.size > 0) {
-    console.log("Using recorded audio blob");
-    try {
-      const url = URL.createObjectURL(audioBlob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.style.display = "none";
-
-      let extension = "webm";
-      const mimeType = mediaRecorder ? mediaRecorder.mimeType : "audio/webm";
-      if (mimeType.includes("mp4")) extension = "mp4";
-      else if (mimeType.includes("ogg")) extension = "ogg";
-      else if (mimeType.includes("webm")) extension = "webm";
-      else if (mimeType.includes("wav")) extension = "wav";
-
-      const timestamp = new Date()
-        .toISOString()
-        .replace(/[:.]/g, "-")
-        .slice(0, -5);
-      const textPreview =
-        textInput.value
-          .trim()
-          .substring(0, 30)
-          .replace(/[^a-z0-9]/gi, "_") || "speech";
-      a.download = `speech_${textPreview}_${timestamp}.${extension}`;
-
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
-
-      status.textContent = "Audio downloaded successfully!";
-      status.className = "status success";
-      return;
-    } catch (error) {
-      console.error("Download error:", error);
-    }
-  }
-
-  // If no recorded blob, generate audio using TTS API
   if (!lastSpokenText) {
-    status.textContent =
-      "No audio available to download. Please speak some text first.";
-    status.className = "status error";
-    console.error("Download failed: lastSpokenText is null/undefined");
+    setStatus("Nothing to download yet. Click Speak first.", "error");
     return;
   }
-
-  if (!lastVoiceSettings) {
-    status.textContent =
-      "Voice settings not available. Please speak some text first.";
-    status.className = "status error";
-    console.error("Download failed: lastVoiceSettings is null/undefined");
-    return;
-  }
-
-  console.log("Generating audio for:", lastSpokenText.substring(0, 50), "...");
-  console.log("Voice settings:", lastVoiceSettings);
 
   try {
-    status.textContent = "Generating audio file, please wait...";
-    status.className = "status speaking";
+    setStatus("Generating MP3 for download...", "speaking");
 
-    const blob = await generateAudioFile(lastSpokenText, lastVoiceSettings);
-    console.log("Audio blob generated:", blob ? blob.size + " bytes" : "null");
-
-    if (!blob || blob.size === 0) {
-      throw new Error("Generated audio file is empty");
+    // Reuse previously generated blob if available
+    if (!downloadBlob) {
+      downloadBlob = await generateMp3ViaOnlineTTS(
+        lastSpokenText,
+        lastVoiceSettings,
+      );
     }
 
-    if (blob && blob.size > 0) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.style.display = "none";
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-")
+      .slice(0, -5);
+    const preview =
+      lastSpokenText.substring(0, 30).replace(/[^a-z0-9]/gi, "_") || "speech";
+    const filename = `speech_${preview}_${timestamp}.mp3`;
 
-      const timestamp = new Date()
-        .toISOString()
-        .replace(/[:.]/g, "-")
-        .slice(0, -5);
-      const textPreview =
-        lastSpokenText.substring(0, 30).replace(/[^a-z0-9]/gi, "_") || "speech";
-      a.download = `speech_${textPreview}_${timestamp}.mp3`;
+    downloadBlobAsFile(downloadBlob, filename);
 
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
-
-      status.textContent = "Audio downloaded successfully!";
-      status.className = "status success";
-    } else {
-      throw new Error("Generated audio is empty");
-    }
-  } catch (error) {
-    console.error("Download error:", error);
-    const errorMsg = error.message || "Unknown error";
-    status.textContent = `Error: ${errorMsg}. Note: Audio download requires internet connection and may be blocked by browser security settings.`;
-    status.className = "status error";
-
-    // Show helpful message
-    setTimeout(() => {
-      status.textContent =
-        "Tip: Make sure you have internet connection and try again. Some browsers block TTS API requests.";
-      status.className = "status";
-    }, 5000);
+    setStatus("Downloaded successfully!", "success");
+  } catch (err) {
+    console.error(err);
+    setStatus(
+      "Download failed. This may be blocked by browser/network restrictions (CORS/proxy).",
+      "error",
+    );
   }
 }
 
-// Event listeners
+// -------------------------
+// Events
+// -------------------------
 speakBtn.addEventListener("click", speak);
 pauseBtn.addEventListener("click", pause);
 resumeBtn.addEventListener("click", resume);
 stopBtn.addEventListener("click", stop);
 downloadBtn.addEventListener("click", downloadAudio);
 
-// Allow Enter key to trigger speak (Ctrl+Enter or Cmd+Enter)
 textInput.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
     e.preventDefault();
     speak();
   }
 });
+
+// Init
+setUiState("idle");
+setStatus("");
