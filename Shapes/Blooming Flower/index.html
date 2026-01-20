@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blooming Flower | HTML CSS JS</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="scene">
+      <div class="note" id="note" aria-hidden="true">
+        <span class="note__ping"></span>
+        <span><b>Tip:</b> Click the Flower to bloom</span>
+      </div>
+
+      <div
+        class="flower"
+        id="flower"
+        role="button"
+        tabindex="0"
+        aria-pressed="false"
+      >
+        <div class="plant">
+          <div class="stem"></div>
+
+          <div class="leaf leaf--left"></div>
+          <div class="leaf leaf--right"></div>
+        </div>
+
+        <div class="head">
+          <div class="clickTag" aria-hidden="true">Click to bloom 🌸</div>
+
+          <div class="petals">
+            <div class="petal" style="--i: 0"></div>
+            <div class="petal" style="--i: 1"></div>
+            <div class="petal" style="--i: 2"></div>
+            <div class="petal" style="--i: 3"></div>
+            <div class="petal" style="--i: 4"></div>
+            <div class="petal" style="--i: 5"></div>
+            <div class="petal" style="--i: 6"></div>
+            <div class="petal" style="--i: 7"></div>
+            <div class="petal" style="--i: 8"></div>
+            <div class="petal" style="--i: 9"></div>
+            <div class="petal" style="--i: 10"></div>
+            <div class="petal" style="--i: 11"></div>
+          </div>
+
+          <div class="center"></div>
+          <div class="pollen" id="pollen"></div>
+        </div>
+      </div>
+
+      <div class="ground" aria-hidden="true"></div>
+
+      <div class="badge" aria-hidden="true">
+        <b>HTML</b> + <b>CSS</b> + <b>JS</b> blooming flower
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
